@@ -13,12 +13,19 @@ def main():
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+    safe_udp.send(NAME, sock, (IP, PORT))
+    res, addr = safe_udp.receive(sock)
+    if res == '0':
+        print('ERROR: This name is taken!')
+        sys.exit(0)
+    else:
+        print('Connected')
     while True:
         cmd = input()
-        safe_udp.send(cmd, sock, (IP, PORT))
+        safe_udp.send(NAME + ' ' + cmd, sock, (IP, PORT))
         # sock.sendto(cmd.encode(constants.ENCODING), (IP, PORT))
-        name = cmd.split()[0]
-        msg = cmd[len(name) + 1:]
+        queue_name = cmd.split()[0]
+        msg = cmd[len(queue_name) + 1:]
         if not msg:
             data, addr = safe_udp.receive(sock)
             # data, addr = sock.recvfrom(constants.BUFFER_SIZE)
