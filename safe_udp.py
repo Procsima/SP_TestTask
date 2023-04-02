@@ -6,7 +6,7 @@ import struct
 
 def send(msg: str, sock: socket.socket, ADDR: (str, int)) -> None:
     msg = msg.encode(constants.ENCODING)
-    sock.settimeout(1)
+    sock.settimeout(constants.TIMEOUT)
     packet_num = 0
 
     size = len(msg)

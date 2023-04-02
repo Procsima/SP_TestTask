@@ -1,6 +1,5 @@
 import sys
 import socket
-import constants
 import safe_udp
 
 

@@ -28,6 +28,7 @@ def main():
                 safe_udp.send('1', sock, addr)
                 clients.add(client_name)
                 print(f'LOG: Client {client_name} connected')
+                # print(f'ip: {addr[0]}, port: {addr[1]}')
             continue
 
         queue_name = data.split()[1]
