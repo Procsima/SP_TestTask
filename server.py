@@ -1,8 +1,7 @@
-import queue
 import sys
 import socket
-import constants
 import safe_udp
+import msg_queue
 
 
 def main():
@@ -24,7 +23,7 @@ def main():
         if len(data.split()) == 1:
             if client_name in clients:
                 safe_udp.send('0', sock, addr)
-                print('Client with existing name tried to connect')
+                print(f'LOG: Client with existing name {client_name} tried to connect')
             else:
                 safe_udp.send('1', sock, addr)
                 clients.add(client_name)
@@ -35,18 +34,18 @@ def main():
         msg = data[len(queue_name) + len(client_name) + 2:]
         if msg:
             if queue_name not in queues:
-                queues[queue_name] = queue.Queue(constants.QUEUE_MAX_SIZE)
+                queues[queue_name] = msg_queue.MsgQueue()
             queues[queue_name].put(msg)
             print(f'LOG: Got msg: {msg}')
         else:
             if queue_name not in queues:
                 print('ERROR: no such queue!')
-                safe_udp.send("ERROR: no such queue!", sock, addr)
+                safe_udp.send("ERROR: No such queue!", sock, addr)
                 # sock.sendto("ERROR: no such queue!".encode(constants.ENCODING), addr)
             else:
                 if queues[queue_name].empty():
                     queues.pop(queue_name)
-                    safe_udp.send("Queue deleted", sock, addr)
+                    safe_udp.send(f'LOG: Queue {queue_name} deleted', sock, addr)
                     # sock.sendto("Queue deleted".encode(constants.ENCODING), addr)
                 else:
                     safe_udp.send(queues[queue_name].get(), sock, addr)
