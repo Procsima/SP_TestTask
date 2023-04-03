@@ -22,7 +22,6 @@ def main():
     while True:
         cmd = input()
         safe_udp.send(NAME + ' ' + cmd, sock, (IP, PORT))
-        # sock.sendto(cmd.encode(constants.ENCODING), (IP, PORT))
         queue_name = cmd.split()[0]
         if queue_name == '#':
             print('LOG: Turning off')
@@ -30,7 +29,6 @@ def main():
         msg = cmd[len(queue_name) + 1:]
         if not msg:
             data, addr = safe_udp.receive(sock)
-            # data, addr = sock.recvfrom(constants.BUFFER_SIZE)
             print(data)
 
 

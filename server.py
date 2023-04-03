@@ -14,11 +14,16 @@ def main():
     sock.bind((IP, PORT))
 
     queues = dict()
-    clients = set()
+    clients = dict()
 
     while True:
         data, addr = safe_udp.receive(sock)
-        # data, addr = sock.recvfrom(constants.BUFFER_SIZE)
+        if not data:
+            for n, a in clients:
+                if a == addr:
+                    clients.pop(n)
+                    break
+            continue
         client_name = data.split()[0]
         if len(data.split()) == 1:
             if client_name in clients:
@@ -26,14 +31,13 @@ def main():
                 print(f'LOG: Client with existing name {client_name} tried to connect')
             else:
                 safe_udp.send('1', sock, addr)
-                clients.add(client_name)
+                clients[client_name] = addr
                 print(f'LOG: Client "{client_name}" connected')
-                # print(f'ip: {addr[0]}, port: {addr[1]}')
             continue
 
         queue_name = data.split()[1]
         if queue_name == '#':
-            clients.remove(client_name)
+            clients.pop(client_name)
             print(f'LOG: Client "{client_name}" disconnected')
             continue
         msg = data[len(queue_name) + len(client_name) + 2:]
@@ -46,15 +50,12 @@ def main():
             if queue_name not in queues:
                 print('ERROR: no such queue!')
                 safe_udp.send("ERROR: No such queue!", sock, addr)
-                # sock.sendto("ERROR: no such queue!".encode(constants.ENCODING), addr)
             else:
                 if queues[queue_name].empty():
                     queues.pop(queue_name)
                     safe_udp.send(f'LOG: Queue {queue_name} deleted', sock, addr)
-                    # sock.sendto("Queue deleted".encode(constants.ENCODING), addr)
                 else:
                     safe_udp.send(queues[queue_name].get(), sock, addr)
-                    # sock.sendto(queues[name].get().encode(constants.ENCODING), addr)
 
 
 if __name__ == '__main__':
